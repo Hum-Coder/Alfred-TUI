@@ -41,7 +41,11 @@ def main():
     config.add_argument("--token", required=True)
 
     args = parser.parse_args()
-    asyncio.run(_dispatch(args))
+
+    if args.command == "tui":
+        _run_tui()
+    else:
+        asyncio.run(_dispatch(args))
 
 
 async def _dispatch(args: argparse.Namespace):
