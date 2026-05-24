@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import httpx
 from typing import Any
 
@@ -17,7 +19,7 @@ class CTFdClient:
             self._http = httpx.AsyncClient(
                 base_url=cfg.url,
                 headers={"Authorization": f"Token {cfg.token}"},
-                timeout=30,
+                timeout=60,
             )
         return self._http
 
@@ -42,6 +44,21 @@ class CTFdClient:
         if not body.get("success"):
             raise RuntimeError(f"API error: {body.get('message', r.text)}")
         return body["data"]
+
+    async def download_files(self, files: list[dict], dest: Path):
+        c = await self._ensure_http()
+        for f in files:
+            route = f.get("route", "")
+            if not route:
+                continue
+            url = route if route.startswith("http") else route
+            r = await c.get(url)
+            r.raise_for_status()
+            name = route.rsplit("/", 1)[-1]
+            path = dest / name
+            with open(path, "wb") as fh:
+                fh.write(r.content)
+            print(f"    Downloaded {name}")
 
     async def list_challenges(self) -> list[Challenge]:
         data = await self._get("/api/v1/challenges")

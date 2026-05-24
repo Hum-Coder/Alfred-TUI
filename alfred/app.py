@@ -6,6 +6,7 @@ import sys
 
 from alfred.state import StateManager
 from alfred.api import CTFdClient
+from alfred.workspace import create_workspace, connect_nc, exit_open
 
 
 def main():
@@ -25,6 +26,13 @@ def main():
     submit.add_argument("flag", type=str)
 
     sub.add_parser("scoreboard", help="Show scoreboard")
+
+    workspace = sub.add_parser("workspace", help="Create workspace for a challenge")
+    workspace.add_argument("challenge_id", type=int)
+    workspace.add_argument("--solve", action="store_true", help="Open workspace and cd into it")
+
+    connect = sub.add_parser("connect", help="Connect to a challenge instance via nc")
+    connect.add_argument("challenge_id", type=int)
 
     config = sub.add_parser("config", help="Set CTFd URL and API token")
     config.add_argument("--url", required=True)
@@ -58,6 +66,10 @@ async def _dispatch(args: argparse.Namespace):
             await _cmd_submit(client, args.challenge_id, args.flag)
         elif args.command == "scoreboard":
             await _cmd_scoreboard(client)
+        elif args.command == "workspace":
+            await _cmd_workspace(client, state, args)
+        elif args.command == "connect":
+            await _cmd_connect(client, args.challenge_id)
     finally:
         await client.close()
 
@@ -81,12 +93,15 @@ async def _cmd_show(client: CTFdClient, challenge_id: int):
     print(f"Solves:      {c.get('solves', 0)}")
     print(f"Solved by me: {c.get('solved_by_me', False)}")
     print(f"Description:\n{c.get('description', '')}")
-    conn = c.get("connection_info") or c.get("connection_info")
+    conn = c.get("connection_info") or ""
     if conn:
         print(f"Connection:  {conn}")
     hints = c.get("hints", [])
     if hints:
         print(f"Hints:       {len(hints)} available")
+    files = c.get("files", [])
+    if files:
+        print(f"Attachments: {len(files)} file(s)")
 
 
 async def _cmd_submit(client: CTFdClient, challenge_id: int, flag: str):
@@ -103,6 +118,18 @@ async def _cmd_scoreboard(client: CTFdClient):
     print("-" * 44)
     for e in entries:
         print(f"{e.pos:<4} {e.name:<30} {e.score:<8}")
+
+
+async def _cmd_workspace(client: CTFdClient, state, args):
+    ws_dir = await create_workspace(client, state, args.challenge_id)
+    print(f"  Workspace: {ws_dir}")
+    if args.solve:
+        exit_open(ws_dir)
+
+
+async def _cmd_connect(client: CTFdClient, challenge_id: int):
+    data = await client.get_challenge(challenge_id)
+    connect_nc(data)
 
 
 if __name__ == "__main__":
