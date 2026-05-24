@@ -67,84 +67,103 @@ def css_for_theme(name: str) -> str:
     if not c:
         c = THEMES["Tokyo Night"]
     return f"""
+$background: {c["background"]};
+$surface: {c["surface"]};
+$text: {c["text"]};
+$text-dim: {c["text_dim"]};
+$primary: {c["primary"]};
+$secondary: {c["secondary"]};
+$accent: {c["accent"]};
+$error: {c["error"]};
+$success: {c["success"]};
+$warning: {c["warning"]};
+$foreground: {c["text"]};
+$foreground-muted: {c["text_dim"]};
+$foreground-darken-1: {c["text"]};
+$panel: {c["surface"]};
+$panel-lighten-1: {c["surface"]};
+$panel-darken-1: {c["background"]};
+$border: {c["primary"]};
+$border-blurred: {c["text_dim"]};
+$boost: {c["surface"]};
+$footer-background: {c["surface"]};
+$footer-foreground: {c["text_dim"]};
+$scrollbar: {c["primary"]};
+$scrollbar-background: {c["surface"]};
+
 Screen {{
-    background: {c["background"]};
-    color: {c["text"]};
+    background: $background;
+    color: $text;
 }}
 
 #header {{
-    background: {c["surface"]};
-    color: {c["text"]};
+    background: $surface;
+    color: $text;
     height: 1;
     dock: top;
 }}
 
 #sidebar {{
-    background: {c["surface"]};
+    background: $surface;
     width: 30;
     dock: left;
     overflow-y: auto;
 }}
 
 #main {{
-    background: {c["background"]};
+    background: $background;
 }}
 
 #footer {{
-    background: {c["surface"]};
-    color: {c["text_dim"]};
+    background: $surface;
+    color: $text-dim;
     height: 2;
     dock: bottom;
 }}
 
 #status-bar {{
-    background: {c["surface"]};
+    background: $surface;
     height: 1;
     dock: top;
 }}
 
-.challenge-card {{
-    padding: 1;
-    margin: 0 1;
-}}
-
 .challenge-card:hover {{
-    background: {c["primary"]}20;
+    background: $primary 20%;
 }}
 
 .challenge-card.selected {{
-    background: {c["primary"]}30;
-    border-left: solid {c["primary"]};
+    background: $primary 30%;
+    border-left: solid $primary;
 }}
 
 .challenge-name {{
-    color: {c["text"]};
+    color: $text;
 }}
 
 .challenge-value {{
-    color: {c["primary"]};
+    color: $primary;
 }}
 
 .challenge-solved {{
-    color: {c["success"]};
+    color: $success;
 }}
 
 .challenge-unsolved {{
-    color: {c["accent"]};
+    color: $accent;
 }}
 
 .detail-label {{
-    color: {c["text_dim"]};
+    color: $text-dim;
 }}
 
 .detail-value {{
-    color: {c["text"]};
+    color: $text;
 }}
 
 .flag-input {{
-    background: {c["surface"]};
-    color: {c["text"]};
-    border: solid {c["primary"]};
+    background: $surface;
+    color: $text;
+    border: solid $primary;
 }}
 
 .scoreboard-row {{
@@ -152,23 +171,23 @@ Screen {{
 }}
 
 .scoreboard-row.highlight {{
-    background: {c["primary"]}30;
+    background: $primary 30%;
 }}
 
 Button {{
-    background: {c["primary"]};
-    color: {c["surface"]};
+    background: $primary;
+    color: $surface;
 }}
 
 Button:hover {{
-    background: {c["secondary"]};
+    background: $secondary;
 }}
 
 #theme-list {{
-    background: {c["surface"]};
+    background: $surface;
 }}
 
 #settings-panel {{
-    background: {c["surface"]};
+    background: $surface;
 }}
 """

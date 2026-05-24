@@ -57,12 +57,7 @@ class ChallengesList(Screen):
         self.app.switch_screen(name)
 
     def action_cycle_theme(self) -> None:
-        names = list(THEMES.keys())
-        current = getattr(self.app, "_current_theme", "Tokyo Night")
-        idx = (names.index(current) + 1) % len(names)
-        self.app._current_theme = names[idx]
-        self.app.stylesheet = css_for_theme(names[idx])
-        self.app.refresh_layout()
+        self.app.action_cycle_theme()
 
     def action_cursor_down(self) -> None:
         lv = self.query_one("#challenge-list", ListView)
@@ -227,23 +222,19 @@ class SettingsScreen(Screen):
     def compose(self) -> ComposeResult:
         yield Header(id="header")
         yield Label("  [b]Settings[/]", id="status-bar")
-        yield VerticalScroll(id="main")
+        with VerticalScroll(id="main"):
+            yield Static("\n  [bold]CTFd Instance[/]")
+            yield Input(placeholder="URL", id="setting-url", value="http://localhost:8000")
+            yield Input(placeholder="API Token", id="setting-token", password=True)
+            yield Static("")
+            yield Static("  [bold]Theme[/]")
+            with ListView(id="theme-list"):
+                for name in list(THEMES.keys()):
+                    yield ListItem(Label(name))
+            yield Static("")
+            yield Button("Save (Ctrl+S)", id="save-btn", variant="primary")
+            yield Button("Back to Challenges", id="back-btn")
         yield Footer(id="footer")
-
-    def on_mount(self) -> None:
-        main = self.query_one("#main", VerticalScroll)
-        main.mount(Static("\n  [bold]CTFd Instance[/]"))
-        main.mount(Input(placeholder="URL", id="setting-url", value="http://localhost:8000"))
-        main.mount(Input(placeholder="API Token", id="setting-token", password=True))
-        main.mount(Static(""))
-        main.mount(Static("  [bold]Theme[/]"))
-        tv = ListView(id="theme-list")
-        for name in list(THEMES.keys()):
-            tv.append(ListItem(Label(name)))
-        main.mount(tv)
-        main.mount(Static(""))
-        main.mount(Button("Save (Ctrl+S)", id="save-btn", variant="primary"))
-        main.mount(Button("Back to Challenges", id="back-btn"))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save-btn":
