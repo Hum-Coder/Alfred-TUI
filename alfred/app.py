@@ -34,6 +34,8 @@ def main():
     connect = sub.add_parser("connect", help="Connect to a challenge instance via nc")
     connect.add_argument("challenge_id", type=int)
 
+    tui = sub.add_parser("tui", help="Launch the Textual TUI (dummy mode)")
+
     config = sub.add_parser("config", help="Set CTFd URL and API token")
     config.add_argument("--url", required=True)
     config.add_argument("--token", required=True)
@@ -70,6 +72,8 @@ async def _dispatch(args: argparse.Namespace):
             await _cmd_workspace(client, state, args)
         elif args.command == "connect":
             await _cmd_connect(client, args.challenge_id)
+        elif args.command == "tui":
+            _run_tui()
     finally:
         await client.close()
 
@@ -130,6 +134,11 @@ async def _cmd_workspace(client: CTFdClient, state, args):
 async def _cmd_connect(client: CTFdClient, challenge_id: int):
     data = await client.get_challenge(challenge_id)
     connect_nc(data)
+
+
+def _run_tui():
+    from alfred.tui.app import run as tui_run
+    tui_run()
 
 
 if __name__ == "__main__":
