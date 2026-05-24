@@ -1,0 +1,3 @@
+httpx>=0.27
+textual>=1.0
+pwntools>=4.12
