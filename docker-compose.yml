@@ -1,0 +1,16 @@
+services:
+  ctfd:
+    image: ctfd/ctfd:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=alfred-dev-secret-key-change-me
+      - DATABASE_URL=sqlite:///ctfd.db
+      - LOG_FOLDER=/var/log/CTFd
+      - UPLOAD_FOLDER=/var/uploads
+    volumes:
+      - ctfd_data:/var
+    restart: unless-stopped
+
+volumes:
+  ctfd_data:
