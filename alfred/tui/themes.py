@@ -70,13 +70,44 @@ def css_for_theme(name: str) -> str:
 $background: {c["background"]};
 $surface: {c["surface"]};
 $text: {c["text"]};
+$text-muted: {c["text_dim"]};
+$text-disabled: {c["text_dim"]};
 $text-dim: {c["text_dim"]};
+$text-primary: {c["primary"]};
+$text-secondary: {c["secondary"]};
+$text-success: {c["success"]};
+$text-warning: {c["warning"]};
+$text-error: {c["error"]};
+$text-accent: {c["accent"]};
 $primary: {c["primary"]};
+$primary-muted: {c["primary"]}40;
+$primary-darken-1: {c["primary"]};
+$primary-darken-2: {c["primary"]};
+$primary-lighten-1: {c["primary"]};
 $secondary: {c["secondary"]};
+$secondary-muted: {c["secondary"]}40;
 $accent: {c["accent"]};
+$accent-muted: {c["accent"]}40;
 $error: {c["error"]};
+$error-muted: {c["error"]}40;
+$error-darken-1: {c["error"]};
+$error-darken-2: {c["error"]};
+$error-darken-3: {c["error"]};
+$error-lighten-2: {c["error"]};
 $success: {c["success"]};
+$success-muted: {c["success"]}40;
+$success-darken-1: {c["success"]};
+$success-darken-2: {c["success"]};
+$success-darken-3: {c["success"]};
+$success-lighten-1: {c["success"]};
+$success-lighten-2: {c["success"]};
 $warning: {c["warning"]};
+$warning-muted: {c["warning"]}40;
+$warning-darken-1: {c["warning"]};
+$warning-darken-2: {c["warning"]};
+$warning-darken-3: {c["warning"]};
+$warning-lighten-2: {c["warning"]};
+$warning-text: {c["text"]};
 $foreground: {c["text"]};
 $foreground-muted: {c["text_dim"]};
 $foreground-darken-1: {c["text"]};
@@ -88,8 +119,58 @@ $border-blurred: {c["text_dim"]};
 $boost: {c["surface"]};
 $footer-background: {c["surface"]};
 $footer-foreground: {c["text_dim"]};
+$footer-description-background: {c["surface"]};
+$footer-description-foreground: {c["text"]};
+$footer-key-background: {c["primary"]}30;
+$footer-key-foreground: {c["primary"]};
+$footer-item-background: {c["background"]};
 $scrollbar: {c["primary"]};
+$scrollbar-active: {c["primary"]};
 $scrollbar-background: {c["surface"]};
+$scrollbar-background-active: {c["background"]};
+$scrollbar-background-hover: {c["background"]};
+$scrollbar-hover: {c["primary"]};
+$scrollbar-corner-color: {c["background"]};
+$input-cursor-background: {c["text"]};
+$input-cursor-foreground: {c["background"]};
+$input-selection-background: {c["primary"]}50;
+$input-selection-foreground: {c["text"]};
+$block-cursor-background: {c["primary"]};
+$block-cursor-foreground: {c["surface"]};
+$block-cursor-blurred-background: {c["text_dim"]};
+$block-cursor-blurred-foreground: {c["surface"]};
+$block-hover-background: {c["primary"]}20;
+$button-color-foreground: {c["surface"]};
+$button-foreground: {c["surface"]};
+$button-focus-text-style: bold;
+$link-color: {c["primary"]};
+$link-color-hover: {c["secondary"]};
+$link-background: transparent;
+$link-background-hover: transparent;
+$link-style-hover: underline;
+$markdown-h1-color: {c["primary"]};
+$markdown-h1-background: transparent;
+$markdown-h1-text-style: bold;
+$markdown-h2-color: {c["secondary"]};
+$markdown-h2-background: transparent;
+$markdown-h2-text-style: bold;
+$markdown-h3-color: {c["text"]};
+$markdown-h3-background: transparent;
+$markdown-h3-text-style: bold;
+$markdown-h4-color: {c["text"]};
+$markdown-h4-background: transparent;
+$markdown-h4-text-style: bold;
+$markdown-h5-color: {c["text"]};
+$markdown-h5-background: transparent;
+$markdown-h5-text-style: bold;
+$markdown-h6-color: {c["text"]};
+$markdown-h6-background: transparent;
+$markdown-h6-text-style: bold;
+$screen-selection-background: {c["primary"]}30;
+$screen-selection-foreground: {c["text"]};
+$name: {c["text"]};
+$ansi-background: {c["background"]};
+$ansi-foreground: {c["text"]};
 
 Screen {{
     background: $background;
@@ -127,51 +208,10 @@ Screen {{
     dock: top;
 }}
 
-.challenge-card:hover {{
-    background: $primary 20%;
-}}
-
-.challenge-card.selected {{
-    background: $primary 30%;
-    border-left: solid $primary;
-}}
-
-.challenge-name {{
-    color: $text;
-}}
-
-.challenge-value {{
-    color: $primary;
-}}
-
-.challenge-solved {{
-    color: $success;
-}}
-
-.challenge-unsolved {{
-    color: $accent;
-}}
-
-.detail-label {{
-    color: $text-dim;
-}}
-
-.detail-value {{
-    color: $text;
-}}
-
 .flag-input {{
     background: $surface;
     color: $text;
     border: solid $primary;
-}}
-
-.scoreboard-row {{
-    padding: 0 2;
-}}
-
-.scoreboard-row.highlight {{
-    background: $primary 30%;
 }}
 
 Button {{
@@ -183,11 +223,46 @@ Button:hover {{
     background: $secondary;
 }}
 
-#theme-list {{
-    background: $surface;
+#celebration {{
+    dock: top;
+    height: 3;
+    text-align: center;
+    padding: 1;
 }}
 
-#settings-panel {{
+.celebration-hidden {{
+    display: none;
+}}
+
+.celebration-correct {{
+    display: block;
+    background: $success;
+    color: $surface;
+    text-style: bold;
+}}
+
+.celebration-incorrect {{
+    display: block;
+    background: $error;
+    color: $surface;
+    text-style: bold;
+}}
+
+.celebration-already {{
+    display: block;
+    background: $warning;
+    color: $surface;
+    text-style: bold;
+}}
+
+.category-header {{
+    color: $primary;
+    background: $surface;
+    text-style: bold;
+    padding: 0 1;
+}}
+
+#theme-list {{
     background: $surface;
 }}
 """

@@ -12,25 +12,27 @@ def get_nonce(text):
     return m.group(1) if m else ""
 
 
+def get_csrf_api(text):
+    """Extract csrfNonce from JS variable in page."""
+    m = re.search(r"csrfNonce['\"]?\s*:\s*['\"]([^'\"]+)['\"]", text)
+    return m.group(1) if m else ""
+
+
 def ok(r):
     if not r.ok:
         return False
     return r.json().get("success", False)
 
 
-# ── 1. Setup wizard ──
+# ── 1. Setup wizard (CSRF via hidden form field) ──
 print("[1/4] Checking CTFd...")
-setup_ses = requests.Session()
-r = setup_ses.get(f"{BASE}/setup", allow_redirects=False)
+r = s.get(f"{BASE}/setup", allow_redirects=False)
 if r.status_code == 302:
     print("  Already configured.")
-    # Copy cookies to main session
-    for c in setup_ses.cookies:
-        s.cookies.set(c.name, c.value)
 else:
     print("  Running setup wizard...")
     nonce = get_nonce(r.text)
-    r = setup_ses.post(f"{BASE}/setup", data={
+    r = s.post(f"{BASE}/setup", data={
         "ctf_name": "NexusCTF Demo",
         "ctf_description": "Local testing instance",
         "user_mode": "users",
@@ -49,25 +51,21 @@ else:
     if r.status_code != 302:
         print(f"  Setup failed: {r.status_code} {r.text[:200]}")
         sys.exit(1)
-    for c in setup_ses.cookies:
-        s.cookies.set(c.name, c.value)
     print("  Setup complete!")
 
-# ── 2. Login as admin & get CSRF nonce ──
+# ── 2. Login as admin ──
 print("[2/4] Logging in as admin...")
 r = s.get(f"{BASE}/login")
 nonce = get_nonce(r.text)
-r = s.post(f"{BASE}/login", data={"name": "admin", "password": "admin", "nonce": nonce}, allow_redirects=False)
-if r.status_code != 302:
+r = s.post(f"{BASE}/login", data={"name": "admin", "password": "admin", "nonce": nonce}, allow_redirects=True)
+if r.status_code != 200:
     print(f"  Login failed: {r.status_code}")
     sys.exit(1)
-# Follow redirect
-loc = r.headers.get("location", "/")
-s.get(f"{BASE}{loc}" if loc.startswith("/") else loc)
+# Grab CSRF nonce from authenticated page for API calls
+r = s.get(f"{BASE}/settings")
+csrf = get_csrf_api(r.text)
+s.headers.update({"CSRF-Token": csrf})
 print("  Logged in.")
-
-# Set CSRF header for all subsequent API calls
-s.headers.update({"CSRF-Token": nonce})
 
 # ── 3. Create API token ──
 print("[3/4] Creating API token...")
@@ -111,7 +109,7 @@ for name, cat, desc, conn, val, flag in challenges:
         print(f"  Skipped {name}")
 
 # ── Verify token works ──
-print("\nVerifying player token...")
+print("\nVerifying API token...")
 r = requests.get(f"{BASE}/api/v1/challenges", headers={"Authorization": f"Token {token}"})
 if ok(r):
     count = len(r.json()["data"])

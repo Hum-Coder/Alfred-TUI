@@ -14,13 +14,14 @@ class CTFdClient:
         self._http: httpx.AsyncClient | None = None
 
     async def _ensure_http(self) -> httpx.AsyncClient:
-        if self._http is None or self._http.is_closed:
-            cfg = self.state.get_config()
-            self._http = httpx.AsyncClient(
-                base_url=cfg.url,
-                headers={"Authorization": f"Token {cfg.token}"},
-                timeout=60,
-            )
+        if self._http and not self._http.is_closed:
+            await self._http.aclose()
+        cfg = self.state.get_config()
+        self._http = httpx.AsyncClient(
+            base_url=cfg.url,
+            headers={"Authorization": f"Token {cfg.token}"},
+            timeout=60,
+        )
         return self._http
 
     async def close(self):
@@ -69,6 +70,7 @@ class CTFdClient:
                 category=c.get("category", ""),
                 value=c.get("value", 0),
                 solved_by_me=c.get("solved_by_me", False),
+                solves=c.get("solves", 0),
             )
             for c in data
         ]
@@ -79,11 +81,21 @@ class CTFdClient:
         return await self._get(f"/api/v1/challenges/{challenge_id}")
 
     async def submit_flag(self, challenge_id: int, flag: str) -> str:
-        data = await self._post("/api/v1/challenges/attempt", {
-            "challenge_id": challenge_id,
-            "submission": flag,
-        })
+        data = await self._post(
+            "/api/v1/challenges/attempt",
+            {
+                "challenge_id": challenge_id,
+                "submission": flag,
+            },
+        )
         return data.get("status", "unknown")
+
+    async def get_me(self) -> str | None:
+        try:
+            data = await self._get("/api/v1/users/me")
+            return data.get("name")
+        except Exception:
+            return None
 
     async def get_scoreboard(self) -> list[ScoreboardEntry]:
         data = await self._get("/api/v1/scoreboard")

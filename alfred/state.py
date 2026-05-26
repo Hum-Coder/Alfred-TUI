@@ -12,6 +12,7 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 class Config:
     url: str = ""
     token: str = ""
+    username: str = ""
 
 
 @dataclass
@@ -23,6 +24,9 @@ class Challenge:
     solved_by_me: bool = False
     description: str = ""
     connection_info: str = ""
+    solves: int = 0
+    files: list = field(default_factory=list)
+    hints: list = field(default_factory=list)
 
 
 @dataclass
@@ -64,9 +68,9 @@ class StateManager:
         with self._lock:
             return Config(**asdict(self._state.config))
 
-    def set_config(self, url: str, token: str):
+    def set_config(self, url: str, token: str, username: str = ""):
         with self._lock:
-            self._state.config = Config(url=url, token=token)
+            self._state.config = Config(url=url, token=token, username=username)
         self.save_config()
 
     def get_challenges(self) -> list[Challenge]:

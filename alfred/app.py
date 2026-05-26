@@ -29,21 +29,28 @@ def main():
 
     workspace = sub.add_parser("workspace", help="Create workspace for a challenge")
     workspace.add_argument("challenge_id", type=int)
-    workspace.add_argument("--solve", action="store_true", help="Open workspace and cd into it")
+    workspace.add_argument(
+        "--solve", action="store_true", help="Open workspace and cd into it"
+    )
 
     connect = sub.add_parser("connect", help="Connect to a challenge instance via nc")
     connect.add_argument("challenge_id", type=int)
 
-    tui = sub.add_parser("tui", help="Launch the Textual TUI (dummy mode)")
+    tui = sub.add_parser("tui", help="Launch the Textual TUI")
+
+    mcp = sub.add_parser("mcp", help="Start MCP stdio server (for AI agent integration)")
 
     config = sub.add_parser("config", help="Set CTFd URL and API token")
     config.add_argument("--url", required=True)
     config.add_argument("--token", required=True)
+    config.add_argument("--username", default="")
 
     args = parser.parse_args()
 
     if args.command == "tui":
         _run_tui()
+    elif args.command == "mcp":
+        _run_mcp()
     else:
         asyncio.run(_dispatch(args))
 
@@ -52,9 +59,11 @@ async def _dispatch(args: argparse.Namespace):
     state = StateManager()
 
     if args.command == "config":
-        state.set_config(args.url, args.token)
+        state.set_config(args.url, args.token, args.username)
         print(f"url={args.url}")
         print(f"token={args.token[:8]}...{args.token[-4:]}")
+        if args.username:
+            print(f"username={args.username}")
         return
 
     cfg = state.get_config()
@@ -141,8 +150,20 @@ async def _cmd_connect(client: CTFdClient, challenge_id: int):
 
 
 def _run_tui():
+    from alfred.state import StateManager
+    from alfred.api import CTFdClient
     from alfred.tui.app import run as tui_run
-    tui_run()
+
+    state = StateManager()
+    cfg = state.get_config()
+    client = CTFdClient(state) if cfg.url and cfg.token else None
+    tui_run(state=state, client=client)
+
+
+def _run_mcp():
+    import asyncio
+    from alfred.mcp_server import main as mcp_main
+    asyncio.run(mcp_main())
 
 
 if __name__ == "__main__":
